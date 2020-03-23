@@ -871,7 +871,7 @@ public class PatientDB extends JFrame implements ActionListener {
 
     //Running Constructor  
     public static void main(String args[]) throws SQLException, ClassNotFoundException {
-        System.out.println("NAMES: Tristin Butz, Rachel Krupa, Garret Cherry");
+        System.out.println("NAMES: Tristin Butz, Rachel Krupa, Garret Cherry, Sabrina Blake");
         PatientDB swingSearchApp = new PatientDB();
     }
 }
