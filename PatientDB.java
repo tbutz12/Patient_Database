@@ -20,7 +20,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
@@ -43,17 +42,21 @@ public class PatientDB extends JFrame implements ActionListener {
     String HCpro;
     String patient_id;
     String URL;
+    String presc;
+    int patCount;
     String id1, id2, id3, id4;
+    String valium, lipitor, zoloft, xanax;
     Connection con;
     boolean[] panelFlags = new boolean[5];
     ArrayList<String> names = new ArrayList<>();
+    JComboBox medPanel;
     int count = -1;
 //Initializing Components  
-    JLabel lb, lb1, lb2, lb3, lb4, lb5, lb6, lb7, lb8, lb10, label1, label2, lab1, lab2, lab3, lab4;
-    JTextField tf1, tf2, tf3, tf4, tf5, tf6, tf8, tf10, text1, text2, txt1, txt2, txt3, txt4;
+    JLabel lb, lb1, lb2, lb3, lb4, lb5, lb6, lb7, lb8, lb10, label1, label2, lab1, lab2, lab3, lab4, sexL;
+    JTextField tf1, tf2, tf3, tf4, tf5, tf6, tf8, tf10, text1, text2, txt1, txt2, txt3, txt4, sexT, sText;
     JTextArea tf7;
     JButton btn, btn2, btn3, btn4;
-    JFrame newFrame, newFrame2, newFrame3;
+    JFrame newFrame, newFrame2, newFrame3, medFrame;
 
     //Creating Constructor for initializing JFrame components  
     PatientDB() throws SQLException, ClassNotFoundException {
@@ -63,6 +66,36 @@ public class PatientDB extends JFrame implements ActionListener {
         Class.forName("com.mysql.jdbc.Driver");
         URL = "jdbc:mysql://localhost:3306/PatientDB?autoReconnect=true&useSSL=false";
         con = (Connection) DriverManager.getConnection(URL, "TMB132", "4328325");
+        PreparedStatement getPatientCount = con.prepareStatement("select count(patient_id) as numPats from Patient");
+        //Excuting Query
+        ResultSet patientCountResult = getPatientCount.executeQuery();
+        if (patientCountResult.next()) {
+            patCount = patientCountResult.getInt("numPats");
+        }
+        PreparedStatement getMedNameXanax = con.prepareStatement("select medication_id from Medication where medication_name = 'Xanax'");
+        //Excuting Query
+        ResultSet medResultXanax = getMedNameXanax.executeQuery();
+        if (medResultXanax.next()) {
+            xanax = medResultXanax.getString("medication_id");
+        }
+        PreparedStatement getMedNameLipitor = con.prepareStatement("select medication_id from Medication where medication_name = 'Lipitor'");
+        //Excuting Query
+        ResultSet medResultLipitor = getMedNameLipitor.executeQuery();
+        if (medResultLipitor.next()) {
+            lipitor = medResultLipitor.getString("medication_id");
+        }
+        PreparedStatement getMedNameZoloft = con.prepareStatement("select medication_id from Medication where medication_name = 'Zoloft'");
+        //Excuting Query
+        ResultSet medResultZoloft = getMedNameZoloft.executeQuery();
+        if (medResultZoloft.next()) {
+            zoloft = medResultZoloft.getString("medication_id");
+        }
+        PreparedStatement getMedNameValium = con.prepareStatement("select medication_id from Medication where medication_name = 'Valium'");
+        //Excuting Query
+        ResultSet medResultValium = getMedNameValium.executeQuery();
+        if (medResultValium.next()) {
+            valium = medResultValium.getString("medication_id");
+        }
         PreparedStatement start = con.prepareStatement("select patient_id from Patient where patient_last_name = ?");
         start.setString(1, "butz");
         //Excuting Query
@@ -99,6 +132,8 @@ public class PatientDB extends JFrame implements ActionListener {
         tf5.setBounds(130, 20, 200, 20);
         tf6 = new JTextField(20);
         tf6.setBounds(130, 50, 200, 20);
+        sexT = new JTextField(20);
+        //sexT.setBounds()
         btn = new JButton("Submit");
         btn.setBounds(180, 90, 100, 20);
         btn.addActionListener(this);
@@ -126,18 +161,22 @@ public class PatientDB extends JFrame implements ActionListener {
         lb2.setBounds(20, 190, 100, 20);
         tf2 = new JTextField(100);
         tf2.setBounds(130, 190, 200, 20);
+        sexL = new JLabel("Sex");
+        sexL.setBounds(20, 220, 100, 20);
+        sexT = new JTextField(20);
+        sexT.setBounds(130, 220, 200, 20);
         lb3 = new JLabel("Medication:");
-        lb3.setBounds(20, 220, 100, 20);
+        lb3.setBounds(20, 310, 100, 20);
         tf3 = new JTextField(50);
-        tf3.setBounds(130, 220, 200, 20);
+        tf3.setBounds(130, 310, 200, 20);
         lb4 = new JLabel("Med Des:");
-        lb4.setBounds(20, 310, 100, 20);
+        lb4.setBounds(20, 340, 100, 20);
         tf4 = new JTextField(200);
-        tf4.setBounds(130, 310, 200, 20);
+        tf4.setBounds(130, 340, 200, 20);
         lb7 = new JLabel("Med Side Effects");
-        lb7.setBounds(20, 340, 100, 20);
+        lb7.setBounds(20, 380, 100, 20);
         tf7 = new JTextArea(5, 20);
-        tf7.setBounds(130, 340, 340, 140);
+        tf7.setBounds(130, 380, 340, 140);
         tf7.setVisible(true);
         tf7.setLineWrap(true);
         JScrollPane scrollPane = new JScrollPane(tf7, JScrollPane.VERTICAL_SCROLLBAR_NEVER,
@@ -175,6 +214,8 @@ public class PatientDB extends JFrame implements ActionListener {
         add(tf8);
         add(lb10);
         add(tf10);
+        add(sexL);
+        add(sexT);
         //Set TextField Editable False  
         tf1.setEditable(false);
         tf2.setEditable(false);
@@ -183,6 +224,7 @@ public class PatientDB extends JFrame implements ActionListener {
         tf7.setEditable(false);
         tf8.setEditable(false);
         tf10.setEditable(false);
+        sexT.setEditable(false);
         setLocationRelativeTo(null);
     }
 
@@ -196,21 +238,27 @@ public class PatientDB extends JFrame implements ActionListener {
                     newFrame.setSize(400, 400);
                     label1 = new JLabel("First Name:");
                     label2 = new JLabel("Last Name:");
+                    JLabel sLabel = new JLabel("Sex");
+                    sLabel.setBounds(20, 80, 100, 20);
                     label1.setBounds(20, 20, 100, 20);
                     label2.setBounds(20, 50, 100, 20);
                     text1 = new JTextField(20);
                     text1.setBounds(130, 20, 200, 20);
                     text2 = new JTextField(20);
                     text2.setBounds(130, 50, 200, 20);
+                    sText = new JTextField(20);
+                    sText.setBounds(130,80,200,20);
                     newFrame.setLayout(null);
                     newFrame.add(label1);
                     newFrame.add(label2);
                     newFrame.add(text1);
                     newFrame.add(text2);
+                    newFrame.add(sLabel);
+                    newFrame.add(sText);
                     newFrame.setLocationRelativeTo(null);
                     newFrame.setVisible(true);
                     JButton btn3 = new JButton("Add Name");
-                    btn3.setBounds(180, 90, 100, 20);
+                    btn3.setBounds(180, 120, 100, 20);
                     newFrame.add(btn3);
                     btn3.addActionListener(this);
                     break;
@@ -227,6 +275,7 @@ public class PatientDB extends JFrame implements ActionListener {
                         patient_id = rs.getString("patient_id");
                         String firstName = rs.getString("patient_first_name");
                         String lastName = rs.getString("patient_last_name");
+                        String sex = rs.getString("sex");
                         PreparedStatement st2 = con.prepareStatement("select medication_name\n"
                                 + "from Patient p inner join Prescription pr\n"
                                 + "on p.patient_id = pr.patient_id inner join Medication m \n"
@@ -277,6 +326,7 @@ public class PatientDB extends JFrame implements ActionListener {
                         tf7.setText(medSide);
                         tf8.setText("Dr. " + pcp);
                         tf10.setText(hc);
+                        sexT.setText(sex);
                     } else {
                         JOptionPane.showMessageDialog(null, "Name not Found");
                     }
@@ -284,19 +334,51 @@ public class PatientDB extends JFrame implements ActionListener {
                 case "Add Name":
                     firstN = text1.getText();
                     lastN = text2.getText();
-                    String sql = "insert into Patient(patient_id, patient_first_name, patient_last_name) values(?, ?, ?)";
+                    String sexS = sText.getText();
+                    String sql = "insert into Patient(patient_id, patient_first_name, patient_last_name, sex) values(?, ?, ?, ?)";
                     UUID uuid = UUID.randomUUID();
                     String random = uuid.toString();
                     names.add(random);
                     count++;
                     PreparedStatement ps = con.prepareStatement(sql);
                     ps.setString(1, random);
+                    String newFirstName = "";
+                    if(firstN.length() == 0){
+                        while(newFirstName.length() == 0){
+                        JOptionPane.showMessageDialog(null, "No input for first name field!");
+                        newFirstName = JOptionPane.showInputDialog(newFrame, "Please enter a valid fist name!");
+                        firstN = new String(newFirstName);
+                        }
+                    }
+                    String newLastName = "";
+                    if(lastN.length() == 0){
+                        while(newLastName.length() == 0){
+                        JOptionPane.showMessageDialog(null, "No input for last name field!");
+                        newLastName = JOptionPane.showInputDialog(newFrame, "Please enter a valid last name!");
+                        lastN = new String(newLastName);
+                        }
+                    }
+                    try{
+                    char newSex = sexS.charAt(0);
+                    if(newSex != 'M' && newSex != 'F'){
+                        while(newSex != 'M' && newSex != 'F'){
+                            JOptionPane.showMessageDialog(null, "Sex must either be Male or Female denoted by M or F!");
+                            String charC = JOptionPane.showInputDialog(newFrame, "Enter a new Sex");
+                            newSex = charC.charAt(0);
+                            System.out.println(newSex);
+                        }
+                    }
+                    }
+                    catch(StringIndexOutOfBoundsException s){
+                        
+                    }
                     ps.setString(2, firstN);
                     ps.setString(3, lastN);
+                    ps.setString(4, sexS);
                     int row;
                     row = ps.executeUpdate();
                     newFrame.setVisible(false);
-                    newFrame = new JFrame("Add Patient information");
+                    newFrame = new JFrame("Add Patient Information");
                     newFrame.setSize(400, 400);
                     lab1 = new JLabel("Ins. Provider:");
                     lab2 = new JLabel("PCP first name:");
@@ -325,12 +407,12 @@ public class PatientDB extends JFrame implements ActionListener {
                     newFrame.add(txt4);
                     newFrame.setLocationRelativeTo(null);
                     newFrame.setVisible(true);
-                    JButton btn4 = new JButton("Add info");
+                    JButton btn4 = new JButton("Add Info");
                     btn4.setBounds(180, 140, 100, 20);
                     newFrame.add(btn4);
                     btn4.addActionListener(this);
                     break;
-                case "Add info":
+                case "Add Info":
                     String pat = names.get(count);
                     HCpro = txt1.getText();
                     String provAdd = txt4.getText();
@@ -340,10 +422,12 @@ public class PatientDB extends JFrame implements ActionListener {
                     preps.setString(2, provAdd);
                     int row2;
                     row2 = preps.executeUpdate();
+                    String doctorFirstName = txt2.getText();
+                    String doctorLastName = txt3.getText();
                     String sql3 = "insert into Patient_PCP(pcp_id, doctor_first_name, doctor_last_name) values(null, ?, ?)";
                     PreparedStatement preps2 = con.prepareStatement(sql3);
-                    preps2.setString(1, firstN);
-                    preps2.setString(2, lastN);
+                    preps2.setString(1, doctorFirstName);
+                    preps2.setString(2, doctorLastName);
                     int row3;
                     row3 = preps2.executeUpdate();
                     String sqql = "update Patient_PCP set patient_id =? where doctor_last_name =?";
@@ -359,6 +443,7 @@ public class PatientDB extends JFrame implements ActionListener {
                     int roww2;
                     roww2 = prs2.executeUpdate();
                     newFrame.setVisible(false);
+                    patCount++;
                     JOptionPane.showMessageDialog(null, "Patient Added!");
                     break;
                 case "View Visit Info":
@@ -407,7 +492,6 @@ public class PatientDB extends JFrame implements ActionListener {
                     newFrame3.setLayout(null);
                     newFrame3.setLocationRelativeTo(null);
                     newFrame3.setVisible(true);
-                    JButton but = new JButton("Go");
                     JMenuBar menuBar = new JMenuBar();
                     menuBar.add(panels);
                     menuBar.setBounds(150, 40, 100, 20);
@@ -596,7 +680,7 @@ public class PatientDB extends JFrame implements ActionListener {
                             testD.setEditable(false);
                             dateTime.setBounds(200, 20, 100, 20);
                             tType.setBounds(200, 40, 100, 20);
-                            testD.setBounds(200, 64, 180, 30);
+                            testD.setBounds(200, 60, 180, 30);
                             sCollected.setBounds(200, 100, 100, 20);
                             result.setBounds(200, 120, 100, 20);
                             newFrame7.add(dateTime);
@@ -641,8 +725,6 @@ public class PatientDB extends JFrame implements ActionListener {
                             File f2 = new File("/Users/tristinbutz/fracture.png");
                             File f3 = new File("/Users/tristinbutz/rootCanal.png");
                             File f4 = new File("/Users/tristinbutz/ivp.jpg");
-                            System.out.println("Pat_id\n" + patient_id);
-                            System.out.println("ID\n" + id2);
                             if (patient_id.equals(id1)) {
                                 try {
                                         try (FileInputStream fin = new FileInputStream(f1)) {
@@ -735,19 +817,50 @@ public class PatientDB extends JFrame implements ActionListener {
                     }
                     break;
                 case "Add Meds":
-                    JFrame medFrame = new JFrame("Prescription");
+                    medFrame = new JFrame("Prescription");
                     medFrame.setSize(400, 400);
                     medFrame.setLayout(null);
                     medFrame.setLocationRelativeTo(null);
                     medFrame.setVisible(true);
                     medFrame.setLayout(null);
+                    medPanel = new JComboBox(new String[]{"Xanax", "Lipitor", "Zoloft", "Valium"});
+                    JMenuBar medMenu = new JMenuBar();
+                    medMenu.add(medPanel);
+                    medMenu.setBounds(150, 40, 100, 20);
+                    medFrame.add(medMenu);
+                    JButton medAdd = new JButton("Add Presc");
+                    medAdd.setBounds(150, 90, 100, 20);
+                    medFrame.add(medAdd);
+                    medAdd.addActionListener(this);
+                    break;
+                case "Add Presc":
+                    if(patCount > 4){
+                    presc = (String)medPanel.getSelectedItem();
                     String medQ = "insert into Prescription(patient_id, medication_id, prescription_start_date, prescription_daily_dosage)" +
                     "values(?, ?, '2016-09-23 10:10:10-08:20', '1 per day')";
                     PreparedStatement medPrep = con.prepareStatement(medQ);
-                    medPrep.setString(1, names.get(count));
-                    medPrep.setString(2, "@med_id_4");
+                    medPrep.setString(1, patient_id);
+                    String addPresc = "";
+                    switch(presc){
+                        case "Xanax":
+                            addPresc = xanax;
+                            break;
+                        case "Lipitor":
+                            addPresc = lipitor;
+                            break;
+                        case "Zoloft":
+                            addPresc = zoloft;
+                            break;
+                        case "Valium":
+                            addPresc = valium;
+                            break;
+                    }
+                    medPrep.setString(2, addPresc);
                     int ex;
                     ex = medPrep.executeUpdate();
+                    medFrame.setVisible(false);
+                    JOptionPane.showMessageDialog(null, "Medication Added!");
+                    }
                 default:
                     break;
             }
