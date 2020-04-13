@@ -15,17 +15,23 @@ SET @med_id_2 = UUID();
 SET @med_id_3 = UUID();
 #Valium
 SET @med_id_4 = UUID();
+#Visit 1
 SET @visit_id_1 = UUID();
+#Visit 2
 SET @visit_id_2 = UUID();
+#Visit 3
 SET @visit_id_3 = UUID();
+#Visit 4
 SET @visit_id_4 = UUID();
 
+#Creates a Patient table
 create table Patient(
     patient_id varchar(36) primary key not null,
     patient_first_name varchar(30),
     patient_last_name varchar(30),
     sex char(2)
-);
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+#Creates a Patient PCP table
 create table Patient_PCP(
     pcp_id int primary key not null auto_increment,
     doctor_first_name varchar(30),
@@ -33,7 +39,8 @@ create table Patient_PCP(
     patient_id varchar(36),
     constraint fk_patient_id_ foreign key(patient_id)
     references Patient(patient_id)
-);
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+#Creates a table for the Patient's Address
 create table Patient_Location(
     location_id int primary key not null auto_increment,
     street_number int,
@@ -44,14 +51,16 @@ create table Patient_Location(
     patient_id varchar(36),
     constraint fk_patient_id foreign key(patient_id)
     references Patient(patient_id)
-);
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+#Creates a medication table
 create table medication(
     medication_id varchar(36) primary key not null,
     medication_name varchar(30),
     medication_description varchar(100),
     medication_side_effects varchar(1000),
     medication_directions varchar(1000)
-);
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+#Creates an Insurance Provider table
 create table InsuranceProvider(
     provider_id int primary key not null auto_increment,
     provider_name varchar(30),
@@ -60,7 +69,8 @@ create table InsuranceProvider(
     patient_id varchar(36),
     constraint _fk_patient_id foreign key(patient_id)
     references Patient(patient_id)
-);
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+#Creates a table for the Doctor's Office
 create table Doctor_Office(
     office_id int primary key not null auto_increment,
     office_name varchar(50),
@@ -68,7 +78,7 @@ create table Doctor_Office(
     patient_pcp_id int,
     constraint fk_patient_pcp foreign key(patient_pcp_id)
     references Patient_PCP(pcp_id)
-);
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
 #end date, pharmacy where presc sent to, fk_doctor_last_name
 create table Prescription (
     patient_id varchar(36) not null,
@@ -81,10 +91,12 @@ create table Prescription (
     constraint fk_patient foreign key (patient_id) 
     references Patient(patient_id)
     ON DELETE CASCADE ON UPDATE CASCADE
-);
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+#Creates a Visit Table
 create table Visit(
     visit_id varchar(36) primary key not null
-);
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+#Creates a table for the Patient's Visit
 create table Patient_Visit(
     date datetime,
     doctorName varchar(30),
@@ -97,7 +109,8 @@ create table Patient_Visit(
     constraint fk_patient_visit foreign key (patient_id) 
     references Patient(patient_id)
     ON DELETE CASCADE ON UPDATE CASCADE
-);
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+#Creates a diagnosis table
 create table Dx(
     dx_id int primary key not null auto_increment,
     description varchar(1000),
@@ -107,8 +120,8 @@ create table Dx(
     references Visit(visit_id),
     constraint fk_patient_dx foreign key(patient_dx)
     references Patient(patient_id)
-    
-);
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+#Creates a Labs table
 create table Labs(
     lab_id int primary key not null auto_increment,
     bodyweight double,
@@ -122,7 +135,8 @@ create table Labs(
     references Visit(visit_id),
     constraint fk_patient_lab foreign key(patient_lab)
     references Patient(patient_id)
-);
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+#Creates a Procedures table
 create table Procedures(
     procedure_id int primary key not null auto_increment,
     surgicalHistory varchar(500),
@@ -132,8 +146,8 @@ create table Procedures(
     references Visit(visit_id),
     constraint fk_patient_procedures foreign key(patient_procedures)
     references Patient(patient_id)
-    
-);
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+#Creates a pathology table
 create table Pathology(
     pathology_id int primary key not null auto_increment,
     date datetime,
@@ -147,7 +161,8 @@ create table Pathology(
     references Visit(visit_id),
     constraint fk_patient_pathology foreign key(patient_pathology)
     references Patient(patient_id)
-);
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+#Creates an imaging table
 create table Imaging(
     imaging_id int primary key not null auto_increment,
      scan varchar(30),
@@ -158,8 +173,8 @@ create table Imaging(
      references Visit(visit_id),
      constraint fk_patient_imaging foreign key(patient_imaging)
      references Patient(patient_id)
-);
-
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+#Inserts values for the patients
 insert into Patient(patient_id, patient_first_name, patient_last_name, sex)
 values(@pat_id_1, "Tristin", "Butz", 'M');
 insert into Patient(patient_id, patient_first_name, patient_last_name, sex)
@@ -168,7 +183,7 @@ insert into Patient(patient_id, patient_first_name, patient_last_name, sex)
 values(@pat_id_3, "Garret", "Cherry", 'M');
 insert into Patient(patient_id, patient_first_name, patient_last_name, sex)
 values(@pat_id_4, "Sabrina", "Blake", 'F');
-
+#Inserts values for the Insurance Provider
 insert into InsuranceProvider(provider_id, provider_name, provider_address)
 values (null, "Aetna", "202 Main St Pittsburgh PA 15214");
 insert into InsuranceProvider(provider_id, provider_name, provider_address)
@@ -177,14 +192,14 @@ insert into InsuranceProvider(provider_id, provider_name, provider_address)
 values (null, "Cigna", "202 Main St Pittsburgh PA 15210");
 insert into InsuranceProvider(provider_id, provider_name, provider_address)
 values (null, "UPMC For You", "200 Celcius St Pittsburgh PA 15226");
-
+#Inserts values for the doctor's office
 insert into Doctor_Office(office_id, office_name, office_address)
 values(null, "Dr. McGann and Associates", "400 W Dover St Pittsburgh PA 15219");
 insert into Doctor_Office(office_id, office_name, office_address)
 values(null, "Dr. Zel and Associates", "402 W Dover St Pittsburgh PA 15211");
 insert into Doctor_Office(office_id, office_name, office_address)
 values(null, "Dr. Elivio and Associates", "404 W Dover St Pittsburgh PA 15213");
-
+#Inserts values for the Patient's PCP
 insert into Patient_PCP(pcp_id, doctor_first_name, doctor_last_name)
 values(null, "Dmitry", "McGann");
 insert into Patient_PCP(pcp_id, doctor_first_name, doctor_last_name)
@@ -193,7 +208,7 @@ insert into Patient_PCP(pcp_id, doctor_first_name, doctor_last_name)
 values(null, "Gret", "Elivio");
 insert into Patient_PCP(pcp_id, doctor_first_name, doctor_last_name)
 values(null, "Michealine", "Wilson");
-
+#Inserts values for the patient's location
 insert into Patient_Location(location_id, street_number, street_name, city, state, zip_code)
 values(null, 2506,"Wylie Ave", "Pittsburgh", 'PA', 15219);
 insert into Patient_Location(location_id, street_number, street_name, city, state, zip_code)
@@ -202,7 +217,7 @@ insert into Patient_Location(location_id, street_number, street_name, city, stat
 values(null, 2506,"E Carson", "Pittsburgh", 'PA', 15211);
 insert into Patient_Location(location_id, street_number, street_name, city, state, zip_code)
 values(null, 25,"Evans Ave", "Ebensburg", 'PA', 15222);
-
+#Inserts values for the medication
 insert into medication(medication_id, medication_name, medication_description, medication_side_effects, medication_directions)
 values(@med_id_1, "Xanax", "Anxiety Medication", "Shakes or tremors. Sleeping difficulties. Confusion. Anxiety. Hallucinations. Seizures. Delirium Tremens.", "The orally disintegrating tablet can be taken with or without water. Swallow the extended-release tablets whole; do not chew, crush, or break them. Your doctor will probably start you on a low dose of alprazolam and gradually increase your dose, not more than once every 3 or 4 days. Alprazolam can be habit-forming.");
 insert into medication(medication_id, medication_name, medication_description, medication_side_effects, medication_directions)
@@ -211,7 +226,7 @@ insert into medication(medication_id, medication_name, medication_description, m
 values(@med_id_3, "Zoloft", "Depression Medication", "Heart disease, high blood pressure, or a stroke. Liver or kidney disease. Bleeding problems, or if you take warfarin. Seizures. Bipolar disorder (manic depression), or low levels of sodium in your blood.", "Take this medication by mouth as directed by your doctor, usually once daily either in the morning or evening. The tablet or liquid form of this medication may be taken with or without food. The capsule form is usually taken with food.");
 insert into medication(medication_id, medication_name, medication_description, medication_side_effects, medication_directions)
 values(@med_id_4, "Valium", "Anxiety Medication", "Shakiness, unsteadiness, blurred vision, blistering of the skin, abdominal or stomach pain, chills, confusion, cough, dark urine, decrease in the frequency of urination, nightmares, outbursts of anger, lack of memory, irritability, itching, loss of interest or pleasure, lower back or side pain, pale skin, restlessness, slurred speech, dizziness, fast heartbeat, irregular breathing, feeling sad or empty","Take this medication by mouth with or without food as directed by your doctor. If you are using the liquid form of this medication, carefully measure the dose using a special measuring device/spoon. Do not use a household spoon because you may not get the correct dose.");
-
+#Inserts values for the Visit
 insert into Visit(visit_id)
 values(@visit_id_1);
 insert into Visit(visit_id)
@@ -220,7 +235,7 @@ insert into Visit(visit_id)
 values(@visit_id_3);
 insert into Visit(visit_id)
 values(@visit_id_4);
-
+#Inserts values for the patient's visit
 insert into Patient_Visit(visit_id, patient_id, date, doctorName, reasonForVisit)
 values(@visit_id_1, @pat_id_1, "2016-09-23 10:10:10-08:00", "McGann", "Patient was distraught about recent coronavirus epidemic.");
 insert into Patient_Visit(visit_id, patient_id, date, doctorName, reasonForVisit)
@@ -229,7 +244,7 @@ insert into Patient_Visit(visit_id, patient_id, date, doctorName, reasonForVisit
 values(@visit_id_3, @pat_id_3, "2016-09-23 10:10:10-08:30", "Elivio", "Patient was sad.");
 insert into Patient_Visit(visit_id, patient_id, date, doctorName, reasonForVisit)
 values(@visit_id_4, @pat_id_4, "2016-09-23 10:10:10-08:40", "Wilson", "Patient was extremely anxious in social environments.");
-
+#Inserts prescription values
 insert into Prescription(patient_id, medication_id, prescription_start_date, prescription_daily_dosage)
 values(@pat_id_1, @med_id_3, '2016-09-23 10:10:10-08:00', "1 per day");
 insert into Prescription(patient_id, medication_id, prescription_start_date, prescription_daily_dosage)
@@ -238,7 +253,7 @@ insert into Prescription(patient_id, medication_id, prescription_start_date, pre
 values(@pat_id_3, @med_id_4, '2016-09-23 10:14:10-08:00', "1 per day");
 insert into Prescription(patient_id, medication_id, prescription_start_date, prescription_daily_dosage)
 values(@pat_id_4, @med_id_1, '2016-09-23 10:12:10-08:00', "1 per day");
-
+#Inserts Patient Visit values
 insert into Patient_Visit(visit_id, patient_id)
 values(@visit_id_1, @pat_id_1);
 insert into Patient_Visit(visit_id, patient_id)
@@ -247,7 +262,7 @@ insert into Patient_Visit(visit_id, patient_id)
 values(@visit_id_3, @pat_id_3);
 insert into Patient_Visit(visit_id, patient_id)
 values(@visit_id_4, @pat_id_4);
-
+#Inserts values for the diagnosis
 insert into Dx(dx_id, description)
 values (null, "Tristin was admitted for the coronavirus.");
 insert into Dx(dx_id, description)
@@ -256,7 +271,7 @@ insert into Dx(dx_id, description)
 values (null, "Garret was admitted for the coronavirus.");
 insert into Dx(dx_id, description)
 values (null, "Sabrina was admitted for the coronavirus.");
-
+#Inserts values for the labs
 insert into Labs(lab_id, bodyweight, height, bloodPressure, bloodType, bodyTemp)
 values(null, 158.2, 73.0, 102.2, "O-", 98.6);
 insert into Labs(lab_id, bodyweight, height, bloodPressure, bloodType, bodyTemp)
@@ -265,7 +280,7 @@ insert into Labs(lab_id, bodyweight, height, bloodPressure, bloodType, bodyTemp)
 values(null, 170.12, 73.0, 102.2, "A-", 98.2);
 insert into Labs(lab_id, bodyweight, height, bloodPressure, bloodType, bodyTemp)
 values(null, 100.24, 73.0, 102.2, "B-", 98.0);
-
+#Inserts values for the Procedures
 insert into Procedures(procedure_id, surgicalHistory)
 values(null, "Patient underwent skull base surgery to remove a pituitary tumor.");
 insert into Procedures(procedure_id, surgicalHistory)
@@ -274,7 +289,7 @@ insert into Procedures(procedure_id, surgicalHistory)
 values(null, "Patient underwent a root canal");
 insert into Procedures(procedure_id, surgicalHistory)
 values(null, "Patient had a kidney stone removed");
-
+#Inserts values for pathology
 insert into Pathology(pathology_id, date, testName, testDescription, siteCollected, result)
 values(null, "2016-09-23 10:10:10-08:40", "Biopsy", "Tissue surrounding the brain removed to be tested for cancerous activity", "Brain", "Benine");
 insert into Pathology(pathology_id, date, testName, testDescription, siteCollected, result)
@@ -283,7 +298,7 @@ insert into Pathology(pathology_id, date, testName, testDescription, siteCollect
 values(null, "2016-09-23 10:10:10-08:10", "CT-Scan", "A scan was taken to get location of infected tooth", "Molar", "Root Canal");
 insert into Pathology(pathology_id, date, testName, testDescription, siteCollected, result)
 values(null, "2016-09-23 10:10:10-08:00", "IVP", "A IVP was given to outline kidneys to find contamination", "Kidney", "Kidney Stone");
-
+#Updates the insurance provider for the patient
 update InsuranceProvider
 set patient_id = @pat_id_1
 where provider_id = 1;
@@ -296,7 +311,7 @@ where provider_id = 3;
 update InsuranceProvider
 set patient_id = @pat_id_4
 where provider_id = 4;
-
+#Updates the location for the patient
 update Patient_Location
 set patient_id = @pat_id_1
 where location_id = 1;
@@ -306,7 +321,7 @@ where location_id = 2;
 update Patient_Location
 set patient_id = @pat_id_3
 where location_id = 3;
-
+#Updates the PCP for the patient
 update Patient_PCP
 set patient_id = @pat_id_1
 where pcp_id = 1;
@@ -319,7 +334,7 @@ where pcp_id = 3;
 update Patient_PCP
 set patient_id = @pat_id_4
 where pcp_id = 4;
-
+#Updates the diagnosis for the patient
 update Dx
 set patient_dx = @pat_id_1
 where dx_id = 1;
@@ -332,7 +347,7 @@ where dx_id = 3;
 update Dx
 set patient_dx = @pat_id_4
 where dx_id = 4;
-
+#Updates the labs for the patient
 update Labs
 set patient_lab = @pat_id_1
 where lab_id = 1;
@@ -345,7 +360,7 @@ where lab_id = 3;
 update Labs
 set patient_lab = @pat_id_4
 where lab_id = 4;
-
+#Updates the pathology for the patient
 update Pathology
 set patient_pathology = @pat_id_1
 where pathology_id = 1;
@@ -358,7 +373,7 @@ where pathology_id = 3;
 update Pathology
 set patient_pathology = @pat_id_4
 where pathology_id = 4;
-
+#Updates the procedures for the patient
 update Procedures
 set patient_procedures = @pat_id_1
 where procedure_id = 1;
@@ -398,7 +413,8 @@ select medication_name from medication
 order by medication_name;
 
 #4.)What were the first 4 prescriptions given?
-select * from Prescription
+select medication_name from Medication m
+join Prescription p on m.medication_id = p.medication_id
 limit 4;
 
 #5.)What patients have Dr.McGann and Dr.Wilson as their PCP?
@@ -414,7 +430,7 @@ where p.patient_first_name = "Tristin" and p.patient_last_name = "Butz";
 #7.)Are there any prescriptions you should take once per day?
 select count(p.prescription_daily_dosage) from Prescription p 
 group by p.prescription_daily_dosage
-having prescription_daily_dosage = "1 per day"
+having prescription_daily_dosage = "1 per day";
 
 #8.)What are the Dx reports for Rachel Krupa?
 select * from Dx
